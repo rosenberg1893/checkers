@@ -5,36 +5,50 @@
    e0e0e0ff серый
    989898ff тёмно-серый
 */
-/* border-radius: 50%;															/* округление квадратов до круга */
-/* float: left;																	/* выравнивание по горизонтали */
 
-:root{																			/* Константы цветов */
+:root{																			/* Константы */									
+	--standartWidth: 70px;														/* длина поля, диаметр окружности шашки */
+	--standartHeight: 70px;														/* высота поля, диаметр окружности шашки */
+	--checkerWidth: 64px;														/* диаметр круга шашки */
+	--checkerHeight: 64px;														/* диаметр круга шашки */
     --gray: #e0e0e0ff;															/* светло-серый */
     --dark-gray: #989898ff;														/* тёмно-серый */
+    --blue: #262739ff;															/* синий */
+    --red: #6e2327ff;															/* красный */
+    --border: #dee0aaff;														/* жёлтый */
 }
 
 div {																			/* Общие параметры для всех слоёв */
-		position: absolute;														/* положение от верхнего левого края странички */
-}
+	width: var(--standartWidth);												/* ширина квадратов */
+	height: var(--standartHeight);												/* высота квадратов */
+	position: absolute;															/* положение от верхнего левого края странички */
+}		
 
-.standartField-0 {																/* Светло-серое поле */
-	width: 70px;																/* ширина квадратов */
-	height: 70px;																/* высота квадратов */
+.field0 {																		/* Светло-серое поле */
 	background: var(--gray);													/* цвет фона слоя */
 }
 
-.standartField-1 {																/* Светло-серое поле */
-	width: 70px;																/* ширина квадратов */
-	height: 70px;																/* высота квадратов*/
+.field1 {																		/* Светло-серое поле */
 	background: var(--dark-gray);												/* цвет фона слоя */
 }
 
-.blackChecker {
+.border {
+	border-radius: 50%;															/* округление квадратов до круга */
+	background: var(--border);													/* цвет фона слоя */
+}
 
+.blackChecker {
+	width: var(--checkerWidth);													/* ширина квадратов */
+	height: var(--checkerHeight);												/* высота квадратов */
+	border-radius: 50%;															/* округление квадратов до круга */
+	background: var(--red);														/* цвет фона слоя */
 }
 
 .whiteChecker {
-
+	width: var(--checkerWidth);													/* ширина квадратов */
+	height: var(--checkerHeight);												/* высота квадратов */
+	border-radius: 50%;															/* округление квадратов до круга */
+	background: var(--blue);													/* цвет фона слоя */
 }
 
 #divButton {																	/* Слой для размещения кнопок */
