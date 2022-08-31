@@ -3,10 +3,37 @@
 		<HEAD>
 			<META CHARSET=UTF-8>
 			<TITLE>Шашки</TITLE>
-			<LINK REL="stylesheet" TYPE="text/css" HREF="design.css">
-			<SCRIPT SRC="script.js"></SCRIPT>
+			<LINK REL="stylesheet" TYPE="text/css" HREF="main-design.css">
+			<SCRIPT SRC="main-script.js"></SCRIPT>
 		</HEAD>
-		
+
 		<BODY ONLOAD="begin()">
+			<DIV ID="tableCaption">
+				<DIV ID="divSpace0"></DIV>
+				<DIV ID="divCaption">ШАШКИ</DIV>
+				<DIV ID="divSpaceText1">
+					<DIV ID="divSpace1"></DIV>
+					<DIV ID="divText1">Выберите размер доски...</DIV>
+					<DIV ID="divSpace2"></DIV>
+				</DIV>
+				<DIV ID="divButtons">
+					<DIV ID="divButton1"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x4" ONCLICK="start(4)"></DIV>
+					<DIV ID="divButton2"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x6" ONCLICK="start(6)"></DIV>
+					<DIV ID="divButton3"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x8" ONCLICK="start(8)"></DIV>
+					<DIV ID="divButton4"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x10" ONCLICK="start(10)"></DIV>
+					<DIV ID="divButton5"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x12" ONCLICK="start(12)"></DIV>
+				</DIV>
+				<DIV ID="divSpaceText2">
+					<DIV ID="divSpace3"></DIV>
+					<DIV ID="divText2">...или введите свой:</DIV>
+					<DIV ID="divSpace4"></DIV>
+				</DIV>
+				<DIV ID="div5">
+					<DIV ID="divText3">x&nbsp</DIV>
+					<DIV><INPUT TYPE="text" ID="textfield1" ONINPUT="ONINPUT_textfield1()" CLASS="textfieldStandart" MAXLENGTH="2" SIZE="3" PLACEHOLDER="16"></DIV>
+					<DIV ID="divSpace5"></DIV>
+					<DIV><INPUT TYPE="button" ID="buttonStart" CLASS="buttonStandart" VALUE="Играть!" ONCLICK="start(textfield1.value)"></DIV>
+				</DIV>
+			</DIV>
 		</BODY>
 </HTML>

@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<HTML>
+		<HEAD>
+			<META CHARSET=UTF-8>
+			<TITLE>Шашки</TITLE>
+			<LINK REL="stylesheet" TYPE="text/css" HREF="main-design.css">
+			<SCRIPT SRC="checkers-script.js"></SCRIPT>
+		</HEAD>
+		
+		<BODY ONLOAD="begin()">
+			<DIV ID="tableCaption">
+				<DIV ID="divSpace0"></DIV>
+				<DIV ID="divGame">
+					<TABLE ID="tableGame" ALIGN="center"></TABLE>
+				</DIV>
+				<DIV ID="divSpace1"></DIV>
+				<DIV ID="divButtons">
+					<DIV><INPUT TYPE="button" ID="buttonCancel" CLASS="buttonStandart buttonX125" VALUE="Отменить ход" ONCLICK="cancel()"></DIV>
+					<DIV><INPUT TYPE="button" ID="buttonStartGame" CLASS="buttonStandart buttonX125" VALUE="Начать игру" ONCLICK="start()"></DIV>
+				</DIV>
+			</DIV>
+		</BODY>
+</HTML>
