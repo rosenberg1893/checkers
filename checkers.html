@@ -14,8 +14,19 @@
 					<TABLE ID="tableGame" ALIGN="center"></TABLE>
 				</DIV>
 				<DIV ID="divSpace1"></DIV>
-				<DIV ID="divButtons">
-					<DIV><INPUT TYPE="button" ID="buttonCancel" CLASS="buttonStandart buttonX125" VALUE="Отменить ход" ONCLICK="cancel()"></DIV>
+				<DIV CLASS="divButtons">
+					<DIV CLASS="divButtons">
+						<DIV><INPUT TYPE="button" ID="buttonCancel0" CLASS="buttonDisabled buttonX125" VALUE="<" ONCLICK="cancel('<')" DISABLED></DIV>
+						<DIV ID="divSpace2"></DIV>
+						<DIV><INPUT TYPE="button" ID="buttonCancel1" CLASS="buttonDisabled buttonX125" VALUE=">" ONCLICK="cancel('>')" DISABLED></DIV>
+					</DIV>
+					<DIV ID="divSpace5"></DIV>
+					<DIV ID="divSpaceText1">
+						<DIV ID="divSpace3"></DIV>
+						<DIV ID="divInformation"></DIV>
+						<DIV ID="divSpace4"></DIV>
+					</DIV>
+					<DIV ID="divSpace6"></DIV>
 					<DIV><INPUT TYPE="button" ID="buttonStartGame" CLASS="buttonStandart buttonX125" VALUE="Начать игру" ONCLICK="start()"></DIV>
 				</DIV>
 			</DIV>

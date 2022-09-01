@@ -30,7 +30,10 @@ body {
 	display: inline-flex;
 	flex-direction: column;
 }
-
+#divInformation {
+	font-size: 125%;
+	color: var(--border);
+}
 #divCaption {
 	border-style: solid;
 	border-color: var(--border);
@@ -42,7 +45,7 @@ body {
 	color: var(--gray);
 	font-size: 150%;
 }
-#divButtons {
+.divButtons {
 	display: inline-flex;
 	justify-content: space-between;
 	flex-direction: row;
@@ -50,6 +53,13 @@ body {
 #tableGame {
 	border-style: solid;
 	border-color: var(--dark-gray);
+}
+.buttonDisabled {
+	border-style: solid;
+	border-color: var(--dark-gray);
+	background: var(--dark-gray-1);
+	font-family: Bahnschrift;
+	color: var(--dark-gray);
 }
 .buttonX225 {
 	font-size: 225%;
@@ -134,16 +144,6 @@ body {
 .focusB {
 	background: var(--redYellow);
 	border-color: var(--border);
-}
-
-
-
-
-#divBackCaption {
-	background: var(--border);
-}
-
-#divFrontCaption {
 }
 
 .textNumberTable {

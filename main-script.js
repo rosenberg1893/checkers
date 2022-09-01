@@ -30,6 +30,5 @@ function ONINPUT_textfield1() {
 }
 
 function start(n) {
-	
 	location.assign('checkers.html?n=' + n);
 }
