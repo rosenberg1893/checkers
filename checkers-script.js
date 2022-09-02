@@ -4,6 +4,9 @@ var fieldLength = 0;
 var checkerBorderLength = 0;
 var isGoing = 'B';
 var focusChecker = null;
+var isFighting = false;
+var wasChecked = false;
+var previousGroupChecker = 'B';
 
 function begin() {
 	var isStarted = false;
@@ -64,21 +67,22 @@ function ONCLICK_field(id) {
 	var col = parseInt(arrayData[1]);
 	var cell = document.getElementById('cell' + id);
 	var checker = cell.firstChild;
-	
 	if(checker != null) {
-		var data_checker = checker.id.split('-');
-		var groupChecker = data_checker[1];
-		if(groupChecker === isGoing) {
-			if(focusChecker == null)
-				focusChecker = new Array();
-			else {
-				var oldChecker = document.getElementById(focusChecker['idChecker']);
-				oldChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
+		if(checker.dataset.canbefocused === 'true') {
+			var data_checker = checker.id.split('-');
+			var groupChecker = data_checker[1];
+			if(groupChecker === isGoing) {
+				if(focusChecker == null)
+					focusChecker = new Array();
+				else {
+					var oldChecker = document.getElementById(focusChecker['idChecker']);
+					oldChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
+				}
+				focusChecker['idChecker'] = checker.id;
+				focusChecker['row'] = row;
+				focusChecker['col'] = col; 
+				checker.setAttribute('CLASS', 'checkers focus' + groupChecker);
 			}
-			focusChecker['idChecker'] = checker.id;
-			focusChecker['row'] = row;
-			focusChecker['col'] = col; 
-			checker.setAttribute('CLASS', 'checkers focus' + groupChecker);
 		}
 	} else if(focusChecker != null) {
 		var data_checker = focusChecker['idChecker'].split('-');
@@ -98,19 +102,103 @@ function ONCLICK_field(id) {
 						true : false;
 			canGo = canGo_col && canGo_row;
 			if(canGo) {
-				move(oldCell, cell, thisChecker, groupChecker);
+				if(!isFighting) {
+					move(oldCell, cell, thisChecker, groupChecker);
+					updateInformation();
+				}
 			} else {
-				checkFight(colChecker, col, rowChecker, row, groupChecker, differenceRow, oldCell, cell, thisChecker);
+				checkFight(colChecker, col, rowChecker, row, groupChecker, oldCell, cell, thisChecker, differenceRow, false);
+				updateInformation();
 			}
 		}
 	}
 }
 
-function checkFight(colChecker, col, rowChecker, row, groupChecker, differenceRow, oldCell, cell, thisChecker) {
-	canGo_col = Math.abs(colChecker - col) == 2;
-	canGo_row = Math.abs(differenceRow) == 2;
-	canGo = canGo_col && canGo_row;
-	if(canGo) {
+function deepCheckFight(checker) {
+	cell = checker.parentNode;
+	data_checker = cell.id.split('-');
+	rowChecker = parseInt(data_checker[0].substring(4));
+	colChecker = parseInt(data_checker[1]);
+	
+	groupChecker = checker.id.split('-')[1];
+			
+	col1 = colChecker - 2; row1 = rowChecker - 2;
+	col2 = colChecker + 2; row2 = rowChecker + 2;
+	var canFight11 = false, canFight12 = false, 
+	canFight21 = false, canFight22 = false;
+				
+	var ok_col1 = col1 >= 0;
+	var ok_col2 = col2 < n;
+	var ok_row1 = row1 >= 0;
+	var ok_row2 = row2 < n;
+			
+	if(ok_row1 && ok_col1)
+		canFight11 = checkFight(colChecker, col1, rowChecker, row1, groupChecker, null, null, null, 0, true);
+	if(ok_row1 && ok_col2)
+		canFight12 = checkFight(colChecker, col2, rowChecker, row1, groupChecker, null, null, null, 0, true, true);
+	if(ok_row2 && ok_col1)
+		canFight21 = checkFight(colChecker, col1, rowChecker, row2, groupChecker, null, null, null, 0, true);
+	if(ok_row2 && ok_col2)
+		canFight22 = checkFight(colChecker, col2, rowChecker, row2, groupChecker, null, null, null, 0, true);
+					
+	if(canFight11 || canFight12 || canFight21 || canFight22) {
+		isFighting = true;
+		checker.dataset.canbefocused = false;
+		return(true);
+	}
+	return(false);
+}
+
+function updateInformation() {
+	if(previousGroupChecker != isGoing) {
+		isFighting = false;
+		var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
+		for(var i = 0; i < arrayCheckers.length; i++)
+			arrayCheckers[i].dataset.canbefocused = 'true';
+		console.log('-------');
+		for(var i = 0; i < arrayCheckers.length; i++) {
+			deepCheckFight(arrayCheckers[i]);
+		}
+		
+		if(!isFighting) {
+			nameChecker = 'СИНИХ';
+			color = 'blue';
+			if(isGoing === 'B') {
+				nameChecker = 'КРАСНЫХ';
+				color = 'red';
+			}
+			information('Ход ' + nameChecker, color);
+		} else {
+			var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
+			for(var i = 0; i < arrayCheckers.length; i++) {
+				var canbefocused = arrayCheckers[i].dataset.canbefocused;
+				arrayCheckers[i].dataset.canbefocused = canbefocused === 'true' ? 'false' : 'true';
+			}
+			
+			nameChecker = 'Синие';
+			color = 'blue';
+			if(isGoing === 'B') {
+				nameChecker = 'Красные';
+				color = 'red';	
+			}
+			information(nameChecker + ' РУБЯТ', color);
+		}
+		previousGroupChecker = isGoing;
+	}
+}
+
+function checkFight(colChecker, col, rowChecker, row, groupChecker, oldCell, cell, thisChecker, differenceRow, isFullChecking) {
+	var canGo = false;
+	if(!isFullChecking) {
+		canGo_col = Math.abs(colChecker - col) == 2;
+		canGo_row = Math.abs(differenceRow) == 2;
+		canGo = canGo_col && canGo_row;
+	} else {
+		var mustFreeCell = document.getElementById('cell' + row + '-' + col);
+		var mustBeNullChecker = mustFreeCell.firstChild;
+		if(mustBeNullChecker != null) return(false);
+	}
+	if(isFullChecking || canGo) {
 		var cellBetween_row = (rowChecker + row) / 2; 
 		var cellBetween_col = (colChecker + col) / 2; 
 		var cellBetween_id = 'cell' + cellBetween_row + '-' + cellBetween_col;
@@ -120,27 +208,38 @@ function checkFight(colChecker, col, rowChecker, row, groupChecker, differenceRo
 			var data_checkerBetween = checkerBetween.id.split('-');
 			var groupCheckerBetween = data_checkerBetween[1];
 			if(groupCheckerBetween != groupChecker) {
-				cellBetween.removeChild(checkerBetween);
-				move(oldCell, cell, thisChecker, groupChecker);
+				if(!isFullChecking) {
+					cellBetween.removeChild(checkerBetween);
+					var oldFocusChecker = focusChecker;
+					move(oldCell, cell, thisChecker, groupChecker);
+					extraCheckFight(oldFocusChecker);
+				}
+				return(true);
 			}
 		}
 	}
+	return(false);
 }
 
-function move(oldCell, cell, thisChecker, groupChecker) {
+function extraCheckFight(fChecker) {
+	var checker = document.getElementById(fChecker['idChecker']);
+	var canFight = deepCheckFight(checker);
+	if(canFight) {
+		isGoing = checker.id.split('-')[1];
+		
+		var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
+		for(var i = 0; i < arrayCheckers.length; i++)
+			arrayCheckers[i].dataset.canbefocused = 'false';
+		checker.dataset.canbefocused = 'true';
+	}
+}
+
+function move(oldCell, cell, thisChecker, groupChecker, isFight) {
 	oldCell.removeChild(thisChecker);
 	cell.appendChild(thisChecker);
-	isGoing = groupChecker === 'A' ? 'B' : 'A';
 	focusChecker = null;
+	isGoing = groupChecker === 'A' ? 'B' : 'A';
 	thisChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
-				
-	nameChecker = 'СИНИХ';
-	color = 'blue';
-	if(isGoing === 'B') {
-		nameChecker = 'КРАСНЫХ';
-		color = 'red';
-	}
-	information('Ход ' + nameChecker, color);
 }
 
 
@@ -230,6 +329,7 @@ function drawCheckers(groupChecker, numberCheckers, rows) {
 				var divChecker = document.createElement('DIV');
 				divChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
 				divChecker.setAttribute('ID', 'checker-' + groupChecker + '-' + k++);
+				divChecker.setAttribute('DATA-CANBEFOCUSED', 'true');
 				divChecker.style.borderWidth = checkerBorderLength + 'px';
 				divChecker.style.width = checkerLength + 'px';
 				divChecker.style.height = checkerLength + 'px';
