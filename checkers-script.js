@@ -1,5 +1,7 @@
 var n = 0;
 var checkerLength = 0;
+var queenLength = 0;
+var queenMargin = 0;
 var fieldLength = 0;
 var checkerBorderLength = 0;
 var isGoing = 'B';
@@ -7,6 +9,7 @@ var focusChecker = null;
 var isFighting = false;
 var wasChecked = false;
 var previousGroupChecker = 'B';
+var countCheckers = new Array();
 
 function begin() {
 	var isStarted = false;
@@ -26,6 +29,8 @@ function begin() {
 	fieldLength = Math.floor(window.innerWidth / 20);
 	checkerLength = Math.floor(fieldLength * 0.95);
 	checkerBorderLength = Math.floor((fieldLength - checkerLength) / 2);
+	queenLength = Math.floor(checkerLength * 0.5);
+	queenMargin = Math.floor((checkerLength - queenLength) / 2);
 	divSpace0.style.height = fieldLength * 0.25 + 'px';
 	
 	var borderLength = 5;
@@ -93,24 +98,70 @@ function ONCLICK_field(id) {
 		var thisChecker = document.getElementById(focusChecker['idChecker']);
 		var oldCell = thisChecker.parentNode;
 		
-		var isQueen = data_checker.length == 4 ? true : false;
+		var isQueen = data_checker.length > 3;
 		if(!isQueen) {
 			var canGo_col = Math.abs(colChecker - col) == 1;
 			var differenceRow = row - rowChecker;
 			canGo_row = groupChecker === 'A' && differenceRow == 1 ||
 						groupChecker === 'B' && differenceRow == -1 ? 
 						true : false;
-			canGo = canGo_col && canGo_row;
+			var canGo = canGo_col && canGo_row;
 			if(canGo) {
 				if(!isFighting) {
 					move(oldCell, cell, thisChecker, groupChecker);
-					updateInformation();
+					//console.log('AFTER SIMPLE MOVE');
+					dontRepeat(thisChecker);
+					//console.log('isFighting = ' + isFighting);
+					//console.log('isGoing = ' + isGoing);
+					//console.log('previousGroupChecker = ' + previousGroupChecker);
 				}
 			} else {
 				checkFight(colChecker, col, rowChecker, row, groupChecker, oldCell, cell, thisChecker, differenceRow, false);
-				updateInformation();
+				dontRepeat(thisChecker);
+			}
+		} else {
+			var canGo = Math.abs(row - rowChecker) == Math.abs(col - colChecker);
+			if(canGo) {
+				if(!isFighting) {
+					move(oldCell, cell, thisChecker, groupChecker);
+					dontRepeat(null, true);
+				} else {
+					checkQueenMoveToFight(thisChecker, oldCell, cell, rowChecker, colChecker, row, col, groupChecker);
+					dontRepeat(null, true);
+				}
 			}
 		}
+	}
+}
+
+function dontRepeat(thisChecker, isQueen = false) {
+	if(previousGroupChecker != isGoing) {
+		//console.log('DONT REPEAT WORK');
+		if(!isQueen) checkQueen(thisChecker);
+		updateInformation();
+		previousGroupChecker = isGoing;
+	}
+}
+
+function checkQueen(checker) {
+	cell = checker.parentNode;
+	data_checker = cell.id.split('-');
+	rowChecker = parseInt(data_checker[0].substring(4));
+	colChecker = parseInt(data_checker[1]);
+	groupChecker = checker.id.split('-')[1];
+	
+	var ok_A = groupChecker === 'A' && rowChecker == n - 1;
+	var ok_B = groupChecker === 'B' && rowChecker == 0;
+	if(ok_A || ok_B) {
+		var divQueen = document.createElement('DIV');
+		divQueen.setAttribute('CLASS', 'divQueen');
+		checker.setAttribute('ID', checker.id + '-Q');
+		divQueen.style.width = queenLength + 'px';
+		divQueen.style.height = queenLength + 'px';
+		divQueen.style.left = queenMargin + 'px';
+		divQueen.style.top = queenMargin + 'px';
+		
+		checker.appendChild(divQueen);
 	}
 }
 
@@ -120,75 +171,220 @@ function deepCheckFight(checker) {
 	rowChecker = parseInt(data_checker[0].substring(4));
 	colChecker = parseInt(data_checker[1]);
 	
-	groupChecker = checker.id.split('-')[1];
+	data_checker = checker.id.split('-');
+	groupChecker = data_checker[1];
+	isQueen = data_checker.length > 3;
 			
-	col1 = colChecker - 2; row1 = rowChecker - 2;
-	col2 = colChecker + 2; row2 = rowChecker + 2;
-	var canFight11 = false, canFight12 = false, 
-	canFight21 = false, canFight22 = false;
-				
-	var ok_col1 = col1 >= 0;
-	var ok_col2 = col2 < n;
-	var ok_row1 = row1 >= 0;
-	var ok_row2 = row2 < n;
-			
-	if(ok_row1 && ok_col1)
-		canFight11 = checkFight(colChecker, col1, rowChecker, row1, groupChecker, null, null, null, 0, true);
-	if(ok_row1 && ok_col2)
-		canFight12 = checkFight(colChecker, col2, rowChecker, row1, groupChecker, null, null, null, 0, true, true);
-	if(ok_row2 && ok_col1)
-		canFight21 = checkFight(colChecker, col1, rowChecker, row2, groupChecker, null, null, null, 0, true);
-	if(ok_row2 && ok_col2)
-		canFight22 = checkFight(colChecker, col2, rowChecker, row2, groupChecker, null, null, null, 0, true);
+	if(!isQueen) {
+		col1 = colChecker - 2; row1 = rowChecker - 2;
+		col2 = colChecker + 2; row2 = rowChecker + 2;
+		var canFight11 = false, canFight12 = false, 
+		canFight21 = false, canFight22 = false;
 					
-	if(canFight11 || canFight12 || canFight21 || canFight22) {
-		isFighting = true;
-		checker.dataset.canbefocused = false;
-		return(true);
+		var ok_col1 = col1 >= 0;
+		var ok_col2 = col2 < n;
+		var ok_row1 = row1 >= 0;
+		var ok_row2 = row2 < n;
+				
+		if(ok_row1 && ok_col1)
+			canFight11 = checkFight(colChecker, col1, rowChecker, row1, groupChecker, null, null, null, 0, true);
+		if(!canFight11 && ok_row1 && ok_col2)
+			canFight12 = checkFight(colChecker, col2, rowChecker, row1, groupChecker, null, null, null, 0, true);
+		if(!canFight11 && !canFight12 && ok_row2 && ok_col1)
+			canFight21 = checkFight(colChecker, col1, rowChecker, row2, groupChecker, null, null, null, 0, true);
+		if(!canFight11 && !canFight12 && !canFight21 && ok_row2 && ok_col2)
+			canFight22 = checkFight(colChecker, col2, rowChecker, row2, groupChecker, null, null, null, 0, true);
+			
+		////console.log('-----' + 'ISQUEEN=' + isQueen);
+		////console.log(checker.id);
+		////console.log(canFight11 + ' ' + canFight12 + ' ' + canFight21 + ' ' + canFight22);
+						
+		if(canFight11 || canFight12 || canFight21 || canFight22) {
+			isFighting = true;
+			checker.dataset.canbefocused = false;
+			return(true);
+		}
+	} else {
+		//console.log('ok');
+		var tmpColCell1 = colChecker;
+		var tmpColCell2 = colChecker;
+		
+		var result1 = 'no data', result1_is_received = false;
+		var result2 = 'no data', result2_is_received = false;
+		
+		for(var i = rowChecker - 1; i > 0; i--) {
+			if(!result1_is_received) result1 = checkQueenFight(i, --tmpColCell1, groupChecker, false, false);
+			//console.log(result1 + ' ' + i + ' ' + tmpColCell1 + ' ');
+			if(!result2_is_received) result2 = checkQueenFight(i, ++tmpColCell2, groupChecker, false, true);
+			//console.log(result2 + ' ' + i + ' ' + tmpColCell2 + ' ');			
+
+			
+			if(result1 === 'can fight' || result1 === 'can not fight' || result1 === 'no cell')
+				result1_is_received = true;
+			if(result2 === 'can fight' || result2 === 'can not fight' || result2 === 'no cell')
+				result2_is_received = true;
+				
+			if(result1_is_received && result2_is_received) break;
+		}
+		
+		result = result1 === 'can fight' || result2 === 'can fight';
+		//console.log('result = ' + result);
+		if(result) {
+			checker.dataset.canbefocused = false;
+			isFighting = true;
+			return(true);
+		} else {
+			tmpColCell1 = colChecker;
+			tmpColCell2 = colChecker;
+			
+			result1 = 'no data'; result1_is_received = false;
+			result2 = 'no data'; result2_is_received = false;
+
+			for(var i = rowChecker + 1; i < n; i++) {
+				if(!result1_is_received) result1 = checkQueenFight(i, --tmpColCell1, groupChecker, true, false);
+				//console.log(result1 + ' ' + i + ' ' + tmpColCell1 + ' ');
+				if(!result2_is_received) result2 = checkQueenFight(i, ++tmpColCell2, groupChecker, true, true);
+				//console.log(result2 + ' ' + i + ' ' + tmpColCell2 + ' ');
+				
+				if(result1 === 'can fight' || result1 === 'can not fight' || result1 === 'no cell')
+					result1_is_received = true;
+				if(result2 === 'can fight' || result2 === 'can not fight' || result2 === 'no cell')
+					result2_is_received = true;
+					
+				if(result1_is_received && result2_is_received) break;
+			}
+			
+			result = result1 === 'can fight' || result2 === 'can fight';
+			//console.log('result = ' + result);
+			if(result) {
+				isFighting = true;
+				checker.dataset.canbefocused = false;
+				return(true);
+			}
+		}
+		
+		//console.log('QQQ---QQQ');
+		//console.log(checker.id);
 	}
 	return(false);
 }
 
-function updateInformation() {
-	if(previousGroupChecker != isGoing) {
-		isFighting = false;
-		var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
-		for(var i = 0; i < arrayCheckers.length; i++)
-			arrayCheckers[i].dataset.canbefocused = 'true';
-		console.log('-------');
-		for(var i = 0; i < arrayCheckers.length; i++) {
-			deepCheckFight(arrayCheckers[i]);
-		}
-		
-		if(!isFighting) {
-			nameChecker = 'СИНИХ';
-			color = 'blue';
-			if(isGoing === 'B') {
-				nameChecker = 'КРАСНЫХ';
-				color = 'red';
-			}
-			information('Ход ' + nameChecker, color);
-		} else {
-			var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
-			for(var i = 0; i < arrayCheckers.length; i++) {
-				var canbefocused = arrayCheckers[i].dataset.canbefocused;
-				arrayCheckers[i].dataset.canbefocused = canbefocused === 'true' ? 'false' : 'true';
-			}
-			
-			nameChecker = 'Синие';
-			color = 'blue';
-			if(isGoing === 'B') {
-				nameChecker = 'Красные';
-				color = 'red';	
-			}
-			information(nameChecker + ' РУБЯТ', color);
-		}
-		previousGroupChecker = isGoing;
+function checkQueenFight(i, tmpColCell, groupChecker, flag1, flag2) {
+	var cell = document.getElementById('cell' + i + '-' + tmpColCell);
+	if(cell != null) {
+		//console.log(cell.id + ' ' + (cell.firstChild == null) + ' ' + (cell.firstElementChild == null));
+		if(cell.firstChild != null) {
+			var backRow = i - 1;
+			var backCol = tmpColCell - 1;
+			if(flag1) backRow = i + 1;
+			if(flag2) backCol = tmpColCell + 1;
+			var backCell = document.getElementById('cell' + backRow + '-' + backCol);
+			//console.log('backCell row = ' + backRow);
+			//console.log('backCell col = ' + backCol);
+			//console.log('backCell!=null ' + (backCell != null));
+			if(backCell != null) //console.log('backCell.firstChild!=null ' + (backCell.firstChild != null));
+			if(backCell != null &&  backCell.firstChild != null) //console.log('groupChecker ' + (cell.firstChild.id.split('-')[1]));
+			if(backCell == null || backCell.firstChild != null || groupChecker == cell.firstChild.id.split('-')[1])
+				return('can not fight');
+			else return('can fight');
+		} else return('void cell');
+	} else return('no cell');
+}
+
+function checkQueenMoveToFight(checker, oldCell, cell, rowChecker, colChecker, row, col, groupChecker) {
+	var i = rowChecker - 1, j = colChecker - 1, step_i = -1, step_j = -1;
+	if(rowChecker < row) {
+		i = rowChecker + 1;
+		step_i = 1;
 	}
+	if(colChecker < col) {
+		j = colChecker + 1;
+		step_j = 1;
+	}
+	var haveChecker = false;
+	var isThisOurChecker = false;
+	var moreThanTwoCheckers = false;
+	var enemyCell, rowEnemy = 0, colEnemy = 0, enemyChecker;
+	for(; i != row;) {
+		thisCell = document.getElementById('cell' + i + '-' + j);
+		if(thisCell.firstChild != null) {
+			if(!haveChecker) {
+				enemyCell = thisCell;
+				enemyChecker = enemyCell.firstChild;
+				isThisOurChecker = groupChecker === thisCell.firstChild.id.split('-')[1];
+				haveChecker = true;
+			} else {
+				moreThanTwoCheckers = true;
+				break;
+			}
+		}
+		i += step_i; j += step_j;
+	}
+	var canFight = !moreThanTwoCheckers && haveChecker && !isThisOurChecker;
+	if(canFight) {
+		var groupEnemy = enemyChecker.id.split('-')[1];
+		countCheckers[groupEnemy]--;
+		enemyCell.removeChild(enemyChecker);
+		var oldFocusChecker = focusChecker;
+		move(oldCell, cell, checker, groupChecker);
+		extraCheckFight(oldFocusChecker);
+	}
+}
+
+function updateInformation() {
+	//console.log('UPDATE INFORMATION BEGIN');	
+	isFighting = false;
+	var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
+	for(var i = 0; i < arrayCheckers.length; i++)
+		arrayCheckers[i].dataset.canbefocused = 'true';
+	//console.log('-------');
+	for(var i = 0; i < arrayCheckers.length; i++) {
+		deepCheckFight(arrayCheckers[i]);
+	}
+	if(!isFighting) {
+		nameChecker = 'СИНИХ';
+		color = 'blue';
+		if(isGoing === 'B') {
+			nameChecker = 'КРАСНЫХ';
+			color = 'red';
+		}
+		information('Ход ' + nameChecker, color);
+	} else {
+		var arrayCheckers = document.getElementsByClassName('checkers ' + isGoing);
+		for(var i = 0; i < arrayCheckers.length; i++) {
+			var canbefocused = arrayCheckers[i].dataset.canbefocused;
+			arrayCheckers[i].dataset.canbefocused = canbefocused === 'true' ? 'false' : 'true';
+		}
+			
+		nameChecker = 'Синие';
+		color = 'blue';
+		if(isGoing === 'B') {
+			nameChecker = 'Красные';
+			color = 'red';	
+		}
+		information(nameChecker + ' РУБЯТ', color);
+	}
+
+	checkFail('A'); checkFail('B');
+	//console.log('UPDATE INFORMATION END');
+}
+
+function checkFail(groupCheckers) {
+	if(countCheckers[groupCheckers] == 0) {
+		nameChecker = 'Синие';
+		color = 'blue';
+		if(groupCheckers === 'A') {
+			nameChecker = 'Красные';
+			color = 'red';	
+		}
+		information(nameChecker + ' ПОБЕДИЛИ', color, true);
+	}
+		
 }
 
 function checkFight(colChecker, col, rowChecker, row, groupChecker, oldCell, cell, thisChecker, differenceRow, isFullChecking) {
 	var canGo = false;
+	////console.log('yes');
 	if(!isFullChecking) {
 		canGo_col = Math.abs(colChecker - col) == 2;
 		canGo_row = Math.abs(differenceRow) == 2;
@@ -209,6 +405,7 @@ function checkFight(colChecker, col, rowChecker, row, groupChecker, oldCell, cel
 			var groupCheckerBetween = data_checkerBetween[1];
 			if(groupCheckerBetween != groupChecker) {
 				if(!isFullChecking) {
+					countCheckers[groupCheckerBetween]--;
 					cellBetween.removeChild(checkerBetween);
 					var oldFocusChecker = focusChecker;
 					move(oldCell, cell, thisChecker, groupChecker);
@@ -234,7 +431,7 @@ function extraCheckFight(fChecker) {
 	}
 }
 
-function move(oldCell, cell, thisChecker, groupChecker, isFight) {
+function move(oldCell, cell, thisChecker, groupChecker) {
 	oldCell.removeChild(thisChecker);
 	cell.appendChild(thisChecker);
 	focusChecker = null;
@@ -242,48 +439,56 @@ function move(oldCell, cell, thisChecker, groupChecker, isFight) {
 	thisChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
 }
 
-
-function recolourCell(id) {
-    var gray = '#474747ff';
-    var dark_gray = '#1f1f1fff';
-    var border = '#dee0aaff';
-
+function redraw(id, color1, color2, color3) {
 	var arrayData = id.split('-');
 	var rows = parseInt(arrayData[0]);
 	var cols = parseInt(arrayData[1]);
 	
 	var cell = document.getElementById('cell' + id);
-	cell.style.background = (rows + cols) % 2 == 0 ? gray : dark_gray;
+	cell.style.background = (rows + cols) % 2 == 0 ? color1 : color2;
 	
 	var checker = cell.firstChild;
-	if(checker != null) checker.style.borderColor = border;
+	if(checker != null) {
+		checker.style.borderColor = color3;
+		if(checker.id.split('-').length > 3) {
+			var divQueen = checker.firstChild;
+			divQueen.style.background = color3;
+		}
+	}
+}
+
+function recolourCell(id) {
+	var gray = '#474747ff';
+    var dark_gray = '#1f1f1fff';
+    var border = '#dee0aaff';
+
+	redraw(id, gray, dark_gray, border);
 }
 
 function returnColorCell(id) {
 	var dark_gray_1 = '#262626ff';
     var dark_gray_2 = '#333333ff';
     var gray = '#e0e0e0ff';
-
-	var arrayData = id.split('-');
-	var rows = parseInt(arrayData[0]);
-	var cols = parseInt(arrayData[1]);
-	
-	var cell = document.getElementById('cell' + id);
-	cell.style.background = (rows + cols) % 2 == 0 ? dark_gray_2 : dark_gray_1;
-	
-	var checker = cell.firstChild;
-	if(checker != null) checker.style.borderColor = gray;
+    
+    redraw(id, dark_gray_2, dark_gray_1, gray);
 }
 
-function information(str, color) {
+function information(str, color, win = false) {
 	var colors = new Array();
 	colors['gray'] = '#e0e0e0ff';	
    	colors['blue'] = '#262739ff';												
     colors['red'] = '#6e2327ff';														
     colors['border'] = '#dee0aaff';	
-
-	divInformation.textContent = str;
-	divInformation.style.color = colors[color];
+    
+    divInformation.textContent = str;
+	if(win) {
+		divInformation.style.background = colors[color];
+		divInformation.style.color = colors['border'];
+		divSpace3.style.background = colors[color];
+		divSpace4.style.background = colors[color];
+	} else {
+		divInformation.style.color = colors[color];
+	}
 }
 
 function start() {
@@ -321,6 +526,10 @@ function drawCheckers(groupChecker, numberCheckers, rows) {
 		final = n;
 		k = numberCheckers / 2;
 	}
+	
+	var halfNumberCheckers = numberCheckers / 2;
+	countCheckers['A'] = halfNumberCheckers;
+	countCheckers['B'] = halfNumberCheckers;
 	
 	for(; i < final; i++) {
 		for(var j = 0; j < n; j++) {

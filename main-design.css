@@ -50,6 +50,11 @@ body {
 	justify-content: space-between;
 	flex-direction: row;
 }
+.divQueen {
+	position: relative;
+	background: var(--gray);
+	border-radius: 50%;
+}
 #tableGame {
 	border-style: solid;
 	border-color: var(--dark-gray);
