@@ -1,33 +1,77 @@
+<!-- Браузер заставляет писать меня эту гадость -->
 <!DOCTYPE HTML>
+
+<!-- Пишем HTML-код между соответствующими парными тегами -->
 <HTML>
-		<HEAD>
+		<!-- Самое главное - в голове -->
+		<HEAD> 
+			<!-- Лишь бы вместо русских букв не было кракозябр -->
 			<META CHARSET=UTF-8>
+			
+			<!-- Название вкладки - лаконичное. Шашки -->
 			<TITLE>Шашки</TITLE>
+			
+			<!-- Подключаю файл со стилями CSS, без них шашек вообще -->
+			<!-- не будет, проверял; только невидимая поначалу таблица -->
 			<LINK REL="stylesheet" TYPE="text/css" HREF="main-design.css">
+			
+			<!-- Без логики о шашках можно забыть, подключаю файл на JavaScript -->
 			<SCRIPT SRC="checkers-script.js"></SCRIPT>
 		</HEAD>
 		
+		<!-- Внутри странички - не менее главное содержимое -->
+		<!-- При загрузке рисуем и заполняем шашечную доску -->
 		<BODY ONLOAD="begin()">
+			<!-- Размещаем слои по flex-разметке (по вертикали сверху вниз) -->
 			<DIV ID="tableCaption">
+				<!-- divSpace0 - пустое пространство между верхним краем странички и шашечной доской -->
 				<DIV ID="divSpace0"></DIV>
-				<DIV ID="divGame">
-					<TABLE ID="tableGame" ALIGN="center"></TABLE>
-				</DIV>
+				
+				<!-- Шашечная доска - это таблица, размещается она по центру слоя -->
+				<TABLE ID="tableGame" ALIGN="center"></TABLE>
+				
+				<!-- divSpace1 - пустое пространство между шашечной доской и кнопками с информационным полем -->
 				<DIV ID="divSpace1"></DIV>
+				
+				<!-- Этот слой - с кнопками и информационным полем, внутри слоя -->
+				<!-- размещаются другие также по flex-разметке (по горизонтали слева направо) -->
 				<DIV CLASS="divButtons">
+					<!-- Слой с кнопками, размещёнными по flex-разметке (по горизонтали слева направо) -->
+					<!-- Отдельный слой нужен, чтобы кнопки не слишком далеко друг от друга находились -->
+					<!-- (не веришь, программист? попробуй убрать "лишние" теги) -->
 					<DIV CLASS="divButtons">
-						<DIV><INPUT TYPE="button" ID="buttonCancel0" CLASS="buttonDisabled buttonX125" VALUE="<" ONCLICK="cancel('<')" DISABLED></DIV>
+						<!-- Кнопка отмены хода, названа лаконично, но пока отключена - функционал не разработан -->
+						<INPUT TYPE="button" ID="buttonCancel0" CLASS="buttonDisabled buttonX125" VALUE="<" ONCLICK="cancel('<')" DISABLED>
+						
+						<!-- Пустое пространство между кнопками - чтобы они не слипались -->
 						<DIV ID="divSpace2"></DIV>
-						<DIV><INPUT TYPE="button" ID="buttonCancel1" CLASS="buttonDisabled buttonX125" VALUE=">" ONCLICK="cancel('>')" DISABLED></DIV>
+						
+						<!-- Кнопка возврата отменённого хода, тоже кратко названа и временно отключена -->
+						<INPUT TYPE="button" ID="buttonCancel1" CLASS="buttonDisabled buttonX125" VALUE=">" ONCLICK="cancel('>')" DISABLED>
 					</DIV>
+					
+					<!-- Пустое пространство между кнопкой ">" и информационным полем -->
 					<DIV ID="divSpace5"></DIV>
-					<DIV ID="divSpaceText1">
+					
+					<!-- Информационное поле - слой, полностью его охватывающий -->
+					<!-- Имеет место flex-разметка (по вертикали сверху вниз) -->
+					<DIV>
+						<!-- Верхний пустой (от текста) закрашенный фоновым цветом слой -->
 						<DIV ID="divSpace3"></DIV>
+						
+						<!-- Главный слой - средний, с текстом -->
 						<DIV ID="divInformation"></DIV>
+						
+						<!-- Нижний пустой (от текста) закрашенный фоновым цветом слой -->
 						<DIV ID="divSpace4"></DIV>
 					</DIV>
+					
+					<!-- Пустое пространство между кнопкой "Начать игру" и информационным полем -->
 					<DIV ID="divSpace6"></DIV>
-					<DIV><INPUT TYPE="button" ID="buttonStartGame" CLASS="buttonStandart buttonX125" VALUE="Начать игру" ONCLICK="start()"></DIV>
+					
+					<!-- Кнопка "Начать игру". Ничего особенного, это всего лишь важнейшая кнопка -->
+					<!-- Без неё не поиграешь. При нажатии отрисовываются шашки на доске -->
+					<INPUT TYPE="button" ID="buttonStartGame" CLASS="buttonStandart buttonX125" VALUE="Начать игру" ONCLICK="start()">
 				</DIV>
 			</DIV>
 		</BODY>

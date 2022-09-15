@@ -1,38 +1,80 @@
+<!-- Браузер требует эту строку, как будто не понятно, что это HTML-разметка -->
 <!DOCTYPE HTML>
+
+<!-- Язык разметки гипертекста. Этим всё сказано -->
 <HTML>
+		<!-- HEAD - всему голова -->
 		<HEAD>
+			<!-- Иероглифов не желаете? -->
 			<META CHARSET=UTF-8>
+			
+			<!-- Название вкладки. Нарды. -->
 			<TITLE>Шашки</TITLE>
+			
+			<!-- Подключение файла с CSS. Без неё - всё поплывёт и уедет. Не вернётся. -->
 			<LINK REL="stylesheet" TYPE="text/css" HREF="main-design.css">
+			
+			<!-- Подключение файла JavaScript. Без него кнопочки не заработают. -->
 			<SCRIPT SRC="main-script.js"></SCRIPT>
 		</HEAD>
 
+		<!-- Содержимое странички - между парными тегами <BODY>...</BODY> -->
+		<!-- При загрузке вычисляем размеры слоёв и кнопок, -->
+		<!-- чтобы всё было в гармонии для любого дисплея -->
 		<BODY ONLOAD="begin()">
+			<!-- Главный слой, внутри него - все остальные по flex-разметке (по вертикали сверху вниз) -->
 			<DIV ID="tableCaption">
+				<!-- Пустое пространство между верхней границей странички и логотипом "ШАШКИ" -->
 				<DIV ID="divSpace0"></DIV>
+				
+				<!-- Слой логотипа с наименованием игры -->
 				<DIV ID="divCaption">ШАШКИ</DIV>
-				<DIV ID="divSpaceText1">
-					<DIV ID="divSpace1"></DIV>
-					<DIV ID="divText1">Выберите размер доски...</DIV>
-					<DIV ID="divSpace2"></DIV>
-				</DIV>
+				
+				<!-- Пустое пространство между логотипом и текстом -->
+				<DIV ID="divSpace1"></DIV>
+					
+				<!-- Слой с текстом -->
+				<DIV ID="divText1">Выберите размер доски...</DIV>
+					
+				<!-- Пустое пространство между текстом и кнопочками -->
+				<DIV ID="divSpace2"></DIV>
+				
+				<!-- Слой с кнопочками, расположенными по flex-разметке (по горизонтали слева направо) -->
 				<DIV CLASS="divButtons">
-					<DIV ID="divButton1"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x4" ONCLICK="start(4)"></DIV>
-					<DIV ID="divButton2"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x6" ONCLICK="start(6)"></DIV>
-					<DIV ID="divButton3"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x8" ONCLICK="start(8)"></DIV>
-					<DIV ID="divButton4"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x10" ONCLICK="start(10)"></DIV>
-					<DIV ID="divButton5"><INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x12" ONCLICK="start(12)"></DIV>
+					<!-- Кнопки, задающие размер шашечной доски в n x n полей... -->
+					<INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x4" ONCLICK="start(4)">
+					<INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x6" ONCLICK="start(6)">
+					<INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x8" ONCLICK="start(8)">
+					<INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x10" ONCLICK="start(10)">
+					<INPUT TYPE="button" CLASS="buttonStandart buttonX225" VALUE="x12" ONCLICK="start(12)">
 				</DIV>
-				<DIV ID="divSpaceText2">
-					<DIV ID="divSpace3"></DIV>
-					<DIV ID="divText2">...или введите свой:</DIV>
-					<DIV ID="divSpace4"></DIV>
-				</DIV>
-				<DIV ID="div5">
+				
+				<!-- Пустое пространство между кнопочками и текстом -->
+				<DIV ID="divSpace3"></DIV>
+					
+				<!-- Слой с текстом поменьше -->
+				<DIV ID="divText2">...или введите свой:</DIV>
+					
+				<!-- Пустое пространство между текстом и текстовым полем с кнопкой "Играть" -->
+				<DIV ID="divSpace4"></DIV>
+				
+				<!-- Слой с текстовым полем и кнопкой "Играть" -->
+				<DIV ID="divTextFieldButtonStart">
+					<!-- Подсказываем, что здесь мы вводим размер шашечной доски -->
 					<DIV ID="divText3">x&nbsp</DIV>
-					<DIV><INPUT TYPE="text" ID="textfield1" ONINPUT="ONINPUT_textfield1()" CLASS="textfieldStandart" MAXLENGTH="2" SIZE="3" PLACEHOLDER="16"></DIV>
+					
+					<!-- Текстовое поле для ввода размера шашечной доски -->
+					<!-- При вводе каждый символ проверяется: вводить можно только цифры -->
+					<!-- Нельзя ввести больше двух символов - MAXLENGTH = 2 -->
+					<!-- SIZE указывает длину текстового поля в символах -->
+					<!-- PLACEHOLDER указывает начальный текст в текстовом поле-->
+					<INPUT TYPE="text" ID="textfield1" ONINPUT="ONINPUT_textfield1()" CLASS="textfieldStandart" MAXLENGTH="2" SIZE="3" PLACEHOLDER="16">
+					
+					<!-- Пустое пространство между текстовым полем и кнопкой "Играть!" -->
 					<DIV ID="divSpace5"></DIV>
-					<DIV><INPUT TYPE="button" ID="buttonStart" CLASS="buttonStandart" VALUE="Играть!" ONCLICK="start(textfield1.value)"></DIV>
+					
+					<!-- Кнопка "Играть", при нажатии передаёт размер доски функции start() -->
+					<INPUT TYPE="button" ID="buttonStart" CLASS="buttonStandart" VALUE="Играть!" ONCLICK="start(textfield1.value)">
 				</DIV>
 			</DIV>
 		</BODY>
