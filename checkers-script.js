@@ -339,8 +339,22 @@ function ONCLICK_field(rowField, colField) {
 						// ПРОВЕРЯЕМ, МОЖЕТ ЛИ ЭТА ШАШКА ЕЩЁ РАЗ СРУБИТЬ
 						checkFightForThisChecker(focusChecker);
 						
-						// если оказалось, что шашка больше рубить НЕ может...
-						if(!canFight) {
+						// если шашка ещё может рубить...
+						if(canFight) {
+							// разрешаем выделять только эту шашку
+							// получаем массив шашек, которые сейчас ходят
+							let arrayActiveCheckers = document.getElementsByClassName('checkers ' + isGoing);
+							
+							// для каждой шашки, которая сейчас ходит...
+							for(let i = 0; i < arrayActiveCheckers.length; i++) {
+								// получаем i-тую шашку и запрещаем её выделять
+								arrayActiveCheckers[i].setAttribute('DATA-CANBEFOCUSED', 'false');
+							}
+							
+							// разрешаем выделять текущую шашку
+							focusChecker.setAttribute('DATA-CANBEFOCUSED', 'true');
+						// иначе, если оказалось, что шашка больше рубить НЕ может...
+						} else {
 							// снимаем цветовое выделение с этой шашки
 							returnStandartColorOfFocusChecker();
 							
