@@ -15,7 +15,7 @@ let focusChecker = null;
 // сколько в данный момент у каждого из игроков есть шашек
 // когда их количество достигнет определённого числа,
 // можно будет говорить о победе одной из сторон или ничье
-let countCheckers = new Array();
+let countCheckers = new Object();
 
 // флаг isGoing содержит имя игрока ('A' или 'B'),
 // шашки которого сейчас могут ходить (в начале это шашки игрока 'B')
@@ -24,6 +24,9 @@ let isGoing = 'B';
 // флаг canFight показывает, может ли хотя бы одна из шашек рубить
 // если шашка может рубить, она должна это сделать
 let canFight = false;
+
+// номер хода
+let numberStroke = 0;
 
 //функция begin() запускается сразу при загрузке странички;
 function begin() {			
@@ -289,7 +292,8 @@ function ONCLICK_field(rowField, colField) {
 					// ПРОВЕРЯЕМ, МОЖЕТ ЛИ КТО-ТО РУБИТЬ
 					checkFightForEveryChecker();
 					
-					//saveGame();
+					// сохраняем игру
+					saveGame();
 				}
 			// иначе, если мы должны рубить...
 			} else {
@@ -378,6 +382,9 @@ function ONCLICK_field(rowField, colField) {
 							// ПРОВЕРЯЕМ, МОЖЕТ ЛИ КТО-ТО РУБИТЬ
 							checkFightForEveryChecker();
 						}
+						
+						// сохраняем игру
+						saveGame();
 					}
 				}
 			}
@@ -604,6 +611,26 @@ function start() {
 	buttonStartGame.value = "Новая игра";
 	// при нажатии кнопки вызывается функция restart(), она начинает игру заново
 	buttonStartGame.setAttribute('ONCLICK', 'restart()');
+	
+	// очищаем данные о прошлой игре
+	let i = 0;
+	while(true) {
+		// получаем номер i-той записи
+		let recordID = 'stroke-' + i;
+	
+		// получаем i-тую запись
+		let record = sessionStorage.getItem(recordID);
+		
+		// если она есть, удаляем её
+		if(record != null) sessionStorage.removeItem(recordID);
+		// если её нет, значит, нет и последующих - цикл завершён
+		else break;
+		
+		i++;
+	}
+	
+	// добавляем нулевую запись - состояние начала игры
+	saveGame();
 }
 
 // функция drawCheckers создаёт и рисует на соответствующих полях
@@ -639,43 +666,50 @@ function drawCheckers(groupChecker) {
 		// для каждого поля текущей строки...
 		for(let j = 0; j < n; j++) {
 			// если это поле чёрное...
-			if((i + j) % 2 != 0) {	
-				// создаём слой будущей шашки
-				let divChecker = document.createElement('DIV');
-				
-				// устанавливаем стиль шашки через классы CSS
-				// класс checkers округляет квадратный слой и задаёт серую обводку
-				// класс A (B) задаёт цвет заливки шашки в соответствии с её группой
-				divChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
-				
-				// составляем для шашки её уникальный номер вида 'checkers-A-4'
-				let idChecker = 'checker-' + groupChecker + '-' + k++;
-				
-				// задаём шашке её уникальный номер
-				divChecker.setAttribute('ID', idChecker);
-				
-				// задаём шашке свойство, которое в дальнейшем нам
-				// подскажет, можно ли выделить эту шашку или нет
-				divChecker.setAttribute('DATA-CANBEFOCUSED', 'true');
-				
-				// задаём толщину обводку шашки
-				divChecker.style.borderWidth = checkerBorderLength + 'px';
-				
-				// задаём ширину шашки
-				divChecker.style.width = checkerLength + 'px';
-				// задаём высоту шашки
-				divChecker.style.height = checkerLength + 'px';
-				
-				// получаем ссылку на объект - поле шашечной доски
-				let cell = document.getElementById('cell-' + i + '-' + j);
-				
-				// добавляем на это поле нашу шашку
-				cell.appendChild(divChecker);
+			if((i + j) % 2 != 0) {
+				// вызываем функцию для создания шашки по указанным данным
+				createCheckerByData(groupChecker, k++, i, j);
 			}
 		}
 	}
 	// записываем начальное кол-во шашек у данного игрока
 	countCheckers[groupChecker] = k;
+}
+
+// функция createCheckerByData непосредственно
+// создаёт слой для шашки и размещает его в указанном месте
+function createCheckerByData(groupChecker, id, row, col, canbefocused = 'true') {
+	// создаём слой будущей шашки
+	let divChecker = document.createElement('DIV');
+				
+	// устанавливаем стиль шашки через классы CSS
+	// класс checkers округляет квадратный слой и задаёт серую обводку
+	// класс A (B) задаёт цвет заливки шашки в соответствии с её группой
+	divChecker.setAttribute('CLASS', 'checkers ' + groupChecker);
+				
+	// составляем для шашки её уникальный номер вида 'checkers-A-4'
+	let idChecker = 'checker-' + groupChecker + '-' + id;
+				
+	// задаём шашке её уникальный номер
+	divChecker.setAttribute('ID', idChecker);
+				
+	// задаём шашке свойство, которое в дальнейшем нам
+	// подскажет, можно ли выделить эту шашку или нет
+	divChecker.setAttribute('DATA-CANBEFOCUSED', canbefocused);
+				
+	// задаём толщину обводку шашки
+	divChecker.style.borderWidth = checkerBorderLength + 'px';
+				
+	// задаём ширину шашки
+	divChecker.style.width = checkerLength + 'px';
+	// задаём высоту шашки
+	divChecker.style.height = checkerLength + 'px';
+				
+	// получаем ссылку на объект - поле шашечной доски
+	let cell = document.getElementById('cell-' + row + '-' + col);
+				
+	// добавляем на это поле нашу шашку
+	cell.appendChild(divChecker);
 }
 
 // функция information() выводит в информационное поле
@@ -734,8 +768,8 @@ function information(str, color, win = false) {
 // функция saveGame() считывает расположение всех шашек на доске
 // записывает информацию об этом в массив и сохраняет массив в session storage
 function saveGame() {
-	// общий массив для текущих игровых данных
-	let data_game = new Array();
+	// общий объект для текущих игровых данных
+	let data_game = new Object();
 	
 	// записываем, кто должен сейчас ходить
 	data_game['isGoing'] = isGoing;
@@ -746,8 +780,20 @@ function saveGame() {
 	// записываем, сколько и у кого шашек
 	data_game['countCheckers'] = countCheckers;
 	
-	// создаём массив шашек и их расположений на доске
-	data_game['arrayCheckers'] = new Array();
+	// создаём объект шашек и их расположений на доске
+	data_game['arrayCheckers'] = new Object();
+	
+	// записываем содержимое информационного поля
+	data_game['textField'] = new Object();
+	
+	// текст информационного поля
+	data_game['textField']['text'] = divInformation.textContent;
+	
+	// цвет текста инф. поля
+	data_game['textField']['color'] = divInformation.style.color;
+	
+	// фон инф. поля
+	data_game['textField']['background'] = divInformation.style.background;
 	
 	// получаем все шашки на доске
 	let checkers = document.getElementsByClassName('checkers');
@@ -759,7 +805,7 @@ function saveGame() {
 		
 		// каждые данные о шашке имеют структуру: строка, столбец ячейки, в которой находится шашка, 
 		// номер шашки, может ли быть выделена
-		data_game['arrayCheckers'][i] = new Array();
+		data_game['arrayCheckers'][i] = new Object();
 		
 		// записываем в общий массив ID шашки
 		data_game['arrayCheckers'][i]['id'] = checkers[i].id;
@@ -774,12 +820,21 @@ function saveGame() {
 		data_game['arrayCheckers'][i]['col'] = data_cellThisChecker[2];
 	}
 	
-	// преобразуем объект в строку - сериализуем данные
-	let serializedData = JSON.stringify(data_game);
+	// если были сохранены какие-то ходы с номером, большим текущего,
+	// удаляем их: это бывает в ситуациях, когда мы откатили игру назад
+	// и сделали какой-то ход; в таких случаях кнопка возврата
+	// отменённого хода работать не должна, ведь порядок игры изменился
 	
-	console.log(data_game);
-	console.log(serializedData);
-	//sessionStorage.setItem(++num, serializedData);
+	// заводим счётчик для ходов, которые надо стереть
+	let idStroke = numberStroke + 1;
+	// пока есть какой-то ход с номером, большим данного...
+	while(sessionStorage.getItem('stroke-' + idStroke) != null) {
+		// стираем его и увеличиваем счётчик
+		sessionStorage.removeItem('stroke-' + idStroke++);
+	}
+	
+	// записываем данные в sessionStorage, преобразовав объект в строку
+	sessionStorage.setItem('stroke-' + numberStroke++, JSON.stringify(data_game));
 }
 
 // функция restart() вновь загружает в текущую вкладку
@@ -789,6 +844,73 @@ function restart() {
 	location.assign('checkers.html?n=' + n + '&start=true');
 }
 
-function cancel() {
+// функция для обработки нажатий на кнопки отмены и возврата отменённого хода
+// принимает аргумент - тип кнопки (или отмена, или возврат)
+function cancel(typeCancel) {
+	// если это кнопка отмены хода, то будет загружен
+	// предыдущий ход (k = -2), иначе следующий после текущего (k = 0)
+	// дело в том, что текущее положение шашек на доске соответствует 
+	// результату предыдущего хода (т.е. numberStroke - 1), а предыдущее 
+	// положение шашек на доске связано с результатом ещё более раннего 
+	// хода (т.е. numberStroke - 2); ход же, который мы сделаем сейчас,
+	// соответствует текущему номеру, поэтому коэффициент не изменяется
+	let k = typeCancel === '<' ? -2 : 0;
+
+	// получаем положение игры при другом ходе
+	let data_game = JSON.parse(sessionStorage.getItem('stroke-' + (numberStroke + k)));
 	
+	// если загружать нечего, ничего дальше выполнять не нужно - прерываем работу
+	if(data_game == null) return false;
+	
+	// теперь идёт другой ход: изменяем значение соответствующей переменной
+	// мы загрузили положение шашек после определённого хода, поэтому сейчас
+	// идёт следующий ход, на единицу больший загруженного
+	numberStroke += k + 1;
+			
+	// изменяем значения переменных в соответствии с предыдущим ходом
+	// переопределяем, кто сейчас ходит...
+	isGoing = data_game['isGoing'];
+			
+	// переопределяем, должен ли сейчас кто-то рубить...
+	canFight = data_game['canFight'];
+			
+	// переопределяем стиль и содержание информационного поля...
+	// текст информационного поля
+	divInformation.textContent = data_game['textField']['text'];
+	
+	// цвет текста инф. поля
+	divInformation.style.color = data_game['textField']['color'];
+	
+	// фон инф. поля (инф. слой состоит из трёх подслоёв: все изменяем)
+	divInformation.style.background = data_game['textField']['background'];
+	divSpace3.style.background = data_game['textField']['background'];
+	divSpace4.style.background = data_game['textField']['background'];
+			
+	// переопределяем, сколько у кого шашек осталось...
+	countCheckers = data_game['countCheckers'];
+			
+	// получаем массив всех шашек на доске
+	let checkers = document.getElementsByClassName('checkers');
+			
+	// пока шашки есть...
+	while(checkers.length != 0) {
+		// убираем одну из них
+		checkers[0].parentNode.removeChild(checkers[0]);
+	}
+			
+	// перебираем все шашки из массива данных о прошлом ходе...
+	for(let i in data_game['arrayCheckers']) {
+		// получаем строку поля, в котором должна быть шашка
+		let row = data_game['arrayCheckers'][i]['row'];
+		
+		// получаем столбец поля, в котором должна быть шашка
+		let col = data_game['arrayCheckers'][i]['col'];
+				
+		// получаем id шашки (напоминаю, имеет вид 'checker-A-17')
+		// разбиваем его на массив данных о шашке
+		let idChecker = data_game['arrayCheckers'][i]['id'].split('-');
+				
+		// вызываем функцию для создания и отрисовки шашки по указанным данным
+		createCheckerByData(idChecker[1], idChecker[2], row, col, data_game['arrayCheckers'][i]['canbefocused']);
+	}
 }
